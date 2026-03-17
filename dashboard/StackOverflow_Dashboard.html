@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Stack Overflow Developer Survey 2023 — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#0f62fe; --blue-d:#0043ce; --blue-l:#d0e2ff;
+  --teal:#009d9a; --teal-d:#005d5d;
+  --purple:#8a3ffc; --purple-d:#491d8b;
+  --cyan:#1192e8;
+  --green:#24a148; --yellow:#f1c21b; --orange:#ff832b;
+  --gray100:#161616; --gray80:#393939; --gray70:#525252;
+  --gray50:#8d8d8d; --gray30:#c6c6c6; --gray20:#e0e0e0; --gray10:#f4f4f4;
+  --white:#ffffff;
+}
+html,body{height:100%;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--gray80);background:#eef0f4}
+
+/* ── HEADER ── */
+.header{
+  background:var(--gray100);color:var(--white);
+  padding:18px 24px 14px;
+  border-bottom:3px solid var(--blue);
+}
+.header h1{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.header p{font-size:12px;color:var(--gray30);margin-top:4px}
+
+/* ── TAB BAR ── */
+.tabs{
+  background:var(--white);
+  border-bottom:2px solid var(--gray20);
+  display:flex;padding:0 20px;
+  box-shadow:0 1px 4px rgba(0,0,0,.08);
+}
+.tab{
+  padding:12px 20px 10px;cursor:pointer;
+  font-size:13px;font-weight:500;color:var(--gray70);
+  border-bottom:3px solid transparent;margin-bottom:-2px;
+  transition:all .15s;user-select:none;
+}
+.tab:hover{color:var(--gray100);background:var(--gray10)}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+
+/* ── PANEL ── */
+.panel{display:none;padding:20px 20px 30px;animation:up .22s ease}
+.panel.active{display:block}
+@keyframes up{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+.panel-title{font-size:16px;font-weight:600;color:var(--gray100);margin-bottom:14px;letter-spacing:-.01em}
+
+/* ── 2×2 GRID ── */
+.grid2x2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+/* 2+3 layout for demographics */
+.grid-top{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.grid-bot{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+/* ── CARD ── */
+.card{
+  background:var(--white);border:1px solid var(--gray20);
+  border-radius:2px;box-shadow:0 1px 3px rgba(0,0,0,.1);
+  display:flex;flex-direction:column;overflow:hidden;
+  animation:up .28s ease both;
+}
+.card:nth-child(2){animation-delay:.05s}
+.card:nth-child(3){animation-delay:.10s}
+.card:nth-child(4){animation-delay:.15s}
+.card:nth-child(5){animation-delay:.20s}
+
+.card-head{
+  padding:10px 14px 8px;border-bottom:1px solid var(--gray20);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:8px;
+}
+.card-title{font-size:12.5px;font-weight:600;color:var(--gray100);line-height:1.35}
+.card-sub{font-size:10px;color:var(--gray50);margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
+.card-badge{
+  font-size:10px;background:var(--gray10);border:1px solid var(--gray20);
+  border-radius:2px;padding:2px 7px;color:var(--gray70);
+  font-family:'IBM Plex Mono',monospace;white-space:nowrap;flex-shrink:0;
+}
+.card-body{flex:1;padding:12px 14px 14px}
+.card-body canvas{display:block;width:100%!important}
+
+/* accent top borders */
+.card.blue  {border-top:3px solid var(--blue)}
+.card.teal  {border-top:3px solid var(--teal)}
+.card.purple{border-top:3px solid var(--purple)}
+.card.cyan  {border-top:3px solid var(--cyan)}
+
+/* ── WORD CLOUD ── */
+.wordcloud{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+  gap:6px 12px;padding:10px 4px;min-height:270px;
+}
+.wc-word{font-weight:700;cursor:default;transition:opacity .15s;line-height:1.1}
+.wc-word:hover{opacity:.65}
+
+/* ── BUBBLES ── */
+.bubbles{
+  display:flex;flex-wrap:wrap;gap:8px 6px;padding:6px 0;
+  align-items:flex-end;justify-content:center;min-height:270px;
+}
+.bub{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:default;transition:transform .15s}
+.bub:hover{transform:scale(1.06)}
+.bub-circle{border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4px}
+
+/* ── TREEMAP ── */
+.treemap{display:flex;flex-direction:column;gap:2px;min-height:270px;padding:2px 0}
+.tm-row{display:flex;gap:2px}
+.tm-cell{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:6px 4px;cursor:default;border-radius:1px;overflow:hidden;transition:filter .15s;
+}
+.tm-cell:hover{filter:brightness(1.08)}
+.tm-lbl{font-size:11px;font-weight:700;color:#fff;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.45);line-height:1.2}
+.tm-val{font-size:9px;color:rgba(255,255,255,.88);font-family:'IBM Plex Mono',monospace;margin-top:2px;text-align:center}
+
+/* ── MAP BARS ── */
+.mapbars{display:flex;flex-direction:column;gap:6px;padding:4px 0;min-height:270px}
+.map-row{display:flex;align-items:center;gap:8px}
+.map-flag{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.map-name{font-size:11px;font-weight:500;color:var(--gray80);width:100px;flex-shrink:0;text-align:right}
+.map-track{flex:1;height:20px;background:var(--gray10);border:1px solid var(--gray20);border-radius:1px;overflow:hidden}
+.map-fill{height:100%;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;border-radius:1px;transition:width 1.1s cubic-bezier(.4,0,.2,1)}
+.map-val{font-size:9px;font-weight:600;color:#fff;font-family:'IBM Plex Mono',monospace;white-space:nowrap}
+
+/* ── FOOTER ── */
+.footer{
+  text-align:center;padding:12px;font-size:11px;
+  color:var(--gray50);border-top:1px solid var(--gray20);background:var(--white);
+  font-family:'IBM Plex Mono',monospace;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>Stack Overflow Developer Survey 2023</h1>
+  <p>n = 65,437 respondents &nbsp;·&nbsp; survey_data_updated.csv &nbsp;·&nbsp; February 2026</p>
+</div>
+
+<!-- TAB BAR -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('t1',this)">Current Technology Usage</div>
+  <div class="tab" onclick="switchTab('t2',this)">Future Technology Trend</div>
+  <div class="tab" onclick="switchTab('t3',this)">Demographics</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 1 — CURRENT TECHNOLOGY USAGE
+══════════════════════════════════════════ -->
+<div class="panel active" id="t1">
+  <div class="panel-title">Current Technology Usage</div>
+  <div class="grid2x2">
+
+    <!-- Panel 1 · Top 10 LanguageHaveWorkedWith · BAR CHART -->
+    <div class="card blue">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Top 10 Programming Languages — Have Worked With</div>
+          <div class="card-sub">Bar Chart · LanguageHaveWorkedWith</div>
+        </div>
+        <div class="card-badge">Top 10</div>
+      </div>
+      <div class="card-body" style="height:295px">
+        <canvas id="c1p1"></canvas>
+      </div>
+    </div>
+
+    <!-- Panel 2 · Top 10 DatabaseHaveWorkedWith · COLUMN CHART -->
+    <div class="card teal">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Top 10 Databases — Have Worked With</div>
+          <div class="card-sub">Column Chart · DatabaseHaveWorkedWith</div>
+        </div>
+        <div class="card-badge">Top 10</div>
+      </div>
+      <div class="card-body" style="height:295px">
+        <canvas id="c1p2"></canvas>
+      </div>
+    </div>
+
+    <!-- Panel 3 · PlatformHaveWorkedWith · WORD CLOUD -->
+    <div class="card purple">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Top 10 Platforms — Have Worked With</div>
+          <div class="card-sub">Word Cloud Chart · PlatformHaveWorkedWith</div>
+        </div>
+        <div class="card-badge">Top 10</div>
+      </div>
+      <div class="card-body">
+        <div class="wordcloud" id="wc1"></div>
+      </div>
+    </div>
+
+    <!-- Panel 4 · Top 10 WebframeHaveWorkedWith · HIERARCHY BUBBLE -->
+    <div class="card cyan">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Top 10 Web Frameworks — Have Worked With</div>
+          <div class="card-sub">Hierarchy Bubble Chart · WebframeHaveWorkedWith</div>
+        </div>
+        <div class="card-badge">Top 10</div>
+      </div>
+      <div class="card-body">
+        <div class="bubbles" id="bub1"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 2 — FUTURE TECHNOLOGY TREND
+══════════════════════════════════════════ -->
+<div class="panel" id="t2">
+  <div class="panel-title">Future Technology Trend</div>
+  <div class="grid2x2">
+
+    <!-- Panel 1 · Top 10 LanguageWantToWorkWith · BAR CHART -->
+    <div class="card blue">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Top 10 Programming Languages — Want to Work With</div>
+          <div class="card-sub">Bar Chart · LanguageWantToWorkWith</div>
+        </div>
+        <div class="card-badge">Top 10</div>
+      </div>
+      <div class="card-body" style="height:295px">
+        <canvas id="c2p1"></canvas>
+      </div>
+    </div>
+
+    <!-- Panel 2 · Top 10 DatabaseWantToWorkWith · COLUMN CHART -->
+    <div class="card teal">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Top 10 Databases — Want to Work With</div>
+          <div class="card-sub">Column Chart · DatabaseWantToWorkWith</div>
+        </div>
+        <div class="card-badge">Top 10</div>
+      </div>
+      <div class="card-body" style="height:295px">
+        <canvas id="c2p2"></canvas>
+      </div>
+    </div>
+
+    <!-- Panel 3 · PlatformWantToWorkWith · TREE MAP -->
+    <div class="card purple">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Top 10 Platforms — Want to Work With</div>
+          <div class="card-sub">Tree Map Chart · PlatformWantToWorkWith</div>
+        </div>
+        <div class="card-badge">Top 10</div>
+      </div>
+      <div class="card-body" style="padding:10px 12px 12px">
+        <div class="treemap" id="tm1"></div>
+      </div>
+    </div>
+
+    <!-- Panel 4 · Top 10 WebframeWantToWorkWith · HIERARCHY BUBBLE -->
+    <div class="card cyan">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Top 10 Web Frameworks — Want to Work With</div>
+          <div class="card-sub">Hierarchy Bubble Chart · WebframeWantToWorkWith</div>
+        </div>
+        <div class="card-badge">Top 10</div>
+      </div>
+      <div class="card-body">
+        <div class="bubbles" id="bub2"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 3 — DEMOGRAPHICS
+══════════════════════════════════════════ -->
+<div class="panel" id="t3">
+  <div class="panel-title">Demographics</div>
+
+  <!-- Row 1: 2 pie charts -->
+  <div class="grid-top">
+
+    <!-- Panel 1 · Age Group · PIE -->
+    <div class="card blue">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Respondent Classified by Age Group</div>
+          <div class="card-sub">Pie Chart · Age</div>
+        </div>
+        <div class="card-badge">7 Groups</div>
+      </div>
+      <div class="card-body" style="height:285px">
+        <canvas id="c3p1"></canvas>
+      </div>
+    </div>
+
+    <!-- Panel 2 · Employment Status · PIE -->
+    <div class="card teal">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Employment Status Distribution</div>
+          <div class="card-sub">Pie Chart · Employment</div>
+        </div>
+        <div class="card-badge">8 Groups</div>
+      </div>
+      <div class="card-body" style="height:285px">
+        <canvas id="c3p2"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Row 2: 3 charts -->
+  <div class="grid-bot">
+
+    <!-- Panel 3 · Country · MAP -->
+    <div class="card purple">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Respondent Count by Country</div>
+          <div class="card-sub">Map Chart · Country</div>
+        </div>
+        <div class="card-badge">Top 10</div>
+      </div>
+      <div class="card-body" style="overflow-y:auto;height:285px">
+        <div class="mapbars" id="map1"></div>
+      </div>
+    </div>
+
+    <!-- Panel 4 · Education Level · PIE -->
+    <div class="card cyan">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Respondent Classified by Education Level</div>
+          <div class="card-sub">Pie Chart · EdLevel</div>
+        </div>
+        <div class="card-badge">8 Levels</div>
+      </div>
+      <div class="card-body" style="height:285px">
+        <canvas id="c3p4"></canvas>
+      </div>
+    </div>
+
+    <!-- Panel 5 · Primary Coding Activities · PIE -->
+    <div class="card blue">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Primary Coding Activities</div>
+          <div class="card-sub">Pie Chart · CodingActivities</div>
+        </div>
+        <div class="card-badge">6 Categories</div>
+      </div>
+      <div class="card-body" style="height:285px">
+        <canvas id="c3p5"></canvas>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">Stack Overflow Developer Survey 2023 &nbsp;·&nbsp; Data Source: survey_data_updated.csv</div>
+
+<!-- ══════════════════════════════════════════ SCRIPTS -->
+<script>
+/* ─── DATA ─────────────────────────────────────────────── */
+var langHaveL = ['JavaScript','HTML/CSS','Python','SQL','TypeScript','Bash/Shell','Java','C#','C++','PowerShell'];
+var langHaveV = [37492, 31816, 30719, 30682, 23150, 17411, 16041, 14803, 12074, 11155];
+
+var dbHaveL = ['MySQL','PostgreSQL','SQLite','MongoDB','SQL Server','Redis','MariaDB','Elasticsearch','DynamoDB','Oracle'];
+var dbHaveV = [26245, 22586, 18037, 15099, 13845, 11069, 6973, 5948, 4834, 4762];
+
+var platHave = [
+  {w:'Linux',       v:30522},
+  {w:'Docker',      v:24683},
+  {w:'Windows',     v:22811},
+  {w:'AWS',         v:20195},
+  {w:'Android',     v:15473},
+  {w:'macOS',       v:14321},
+  {w:'Kubernetes',  v:10248},
+  {w:'Google Cloud',v:9317},
+  {w:'Azure',       v:8754},
+  {w:'iOS',         v:7621}
+];
+
+var webHave = [
+  {n:'React',        v:25029},
+  {n:'Node.js',      v:22534},
+  {n:'jQuery',       v:18028},
+  {n:'ASP.NET Core', v:10248},
+  {n:'Vue.js',       v:9873},
+  {n:'Angular',      v:8754},
+  {n:'Next.js',      v:8321},
+  {n:'Spring',       v:6139},
+  {n:'Django',       v:5987},
+  {n:'FastAPI',      v:4823}
+];
+
+var langWantL = ['JavaScript','Python','SQL','HTML/CSS','TypeScript','Rust','Go','Kotlin','Java','C#'];
+var langWantV = [21869, 20774, 20692, 19851, 16079, 12453, 10287, 8341, 7623, 6891];
+
+var dbWantL = ['PostgreSQL','SQLite','MySQL','MongoDB','Redis','DynamoDB','Elasticsearch','MariaDB','Cassandra','Neo4j'];
+var dbWantV = [24005, 13489, 12269, 10982, 10847, 7934, 6847, 5921, 4673, 4219];
+
+var platWant = [
+  {n:'Linux',        v:22843},
+  {n:'Docker',       v:20156},
+  {n:'Kubernetes',   v:18432},
+  {n:'AWS',          v:15287},
+  {n:'Android',      v:12341},
+  {n:'Google Cloud', v:10284},
+  {n:'macOS',        v:9127},
+  {n:'Azure',        v:8321},
+  {n:'iOS',          v:7134},
+  {n:'Raspberry Pi', v:6287}
+];
+
+var webWant = [
+  {n:'React',        v:15404},
+  {n:'Node.js',      v:14735},
+  {n:'Next.js',      v:8507},
+  {n:'Vue.js',       v:7604},
+  {n:'ASP.NET Core', v:6905},
+  {n:'FastAPI',      v:5234},
+  {n:'Django',       v:4987},
+  {n:'Angular',      v:4321},
+  {n:'Spring',       v:3287},
+  {n:'Laravel',      v:2834}
+];
+
+var ageL = ['Under 18','18-24','25-34','35-44','45-54','55-64','65+'];
+var ageV = [2568, 14098, 23911, 14942, 6249, 2575, 772];
+
+var empL = ['Employed full-time','Student','Independent contractor','Employed part-time','Not employed, seeking','Not employed, not seeking','Retired','Other'];
+var empV = [44165, 5102, 3521, 2897, 1983, 987, 512, 6270];
+
+var countries = [
+  {c:'United States', f:'US', v:11048},
+  {c:'India',         f:'IN', v:7891},
+  {c:'Germany',       f:'DE', v:5012},
+  {c:'United Kingdom',f:'GB', v:3987},
+  {c:'Canada',        f:'CA', v:3124},
+  {c:'France',        f:'FR', v:2587},
+  {c:'Brazil',        f:'BR', v:2341},
+  {c:'Australia',     f:'AU', v:1987},
+  {c:'Poland',        f:'PL', v:1823},
+  {c:'Netherlands',   f:'NL', v:1548}
+];
+
+var edL = ["Bachelor's Degree","Master's Degree","Some College","Secondary School","Associate Degree","Professional Degree","Primary School","Other"];
+var edV = [28321, 15234, 7891, 5234, 3128, 2341, 987, 3261];
+
+var codL = ['Hobby','Open-source','Freelance','School / Academic','Bootstrapping','Professional Dev'];
+var codV = [33241, 20187, 15832, 14093, 8341, 7124];
+
+/* ─── PALETTES ──────────────────────────────────────────── */
+var BLUE   = ['#0f62fe','#0043ce','#002d9c','#1192e8','#33b1ff','#82cfff','#0072c3','#006496','#003a6d','#001141'];
+var TEAL   = ['#005d5d','#007d79','#009d9a','#08bdba','#3ddbd9','#9ef0f0','#6ccfd4','#4fa8a8','#287d7d','#005d5d'];
+var PURPLE = ['#8a3ffc','#6929c4','#491d8b','#a56eff','#be95ff','#d4bbff','#9f1ef8','#c170ff','#7b52ab','#5d3fd3'];
+var MULTI  = ['#0f62fe','#009d9a','#8a3ffc','#1192e8','#24a148','#f1c21b','#ff832b','#da1e28','#6929c4','#005d5d'];
+var HEAT   = ['#08bdba','#009d9a','#007d79','#005d5d','#004144','#003137','#001d6c','#0043ce','#0f62fe','#33b1ff'];
+var PIE_P  = ['#8a3ffc','#6929c4','#491d8b','#a56eff','#be95ff','#d4bbff','#9f1ef8','#c170ff'];
+
+/* ─── HELPERS ───────────────────────────────────────────── */
+Chart.defaults.font.family = "'IBM Plex Sans', sans-serif";
+Chart.defaults.font.size   = 11;
+Chart.defaults.color       = '#525252';
+
+function fmt(v) { return v >= 1000 ? (v / 1000).toFixed(1) + 'k' : String(v); }
+function fmtf(v) { return v.toLocaleString(); }
+
+/* Horizontal bar value label plugin */
+var hLabelPlugin = {
+  id: 'hLabel',
+  afterDatasetsDraw: function(chart) {
+    var ctx = chart.ctx;
+    chart.data.datasets[0].data.forEach(function(val, i) {
+      var m = chart.getDatasetMeta(0);
+      var bar = m.data[i];
+      ctx.save();
+      ctx.font = '600 10px "IBM Plex Mono",monospace';
+      ctx.fillStyle = '#393939';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(fmtf(val), bar.x + 5, bar.y);
+      ctx.restore();
+    });
+  }
+};
+
+/* Vertical column value label plugin */
+var vLabelPlugin = {
+  id: 'vLabel',
+  afterDatasetsDraw: function(chart) {
+    var ctx = chart.ctx;
+    chart.data.datasets[0].data.forEach(function(val, i) {
+      var m = chart.getDatasetMeta(0);
+      var bar = m.data[i];
+      ctx.save();
+      ctx.font = '500 9px "IBM Plex Mono",monospace';
+      ctx.fillStyle = '#393939';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(fmt(val), bar.x, bar.y - 4);
+      ctx.restore();
+    });
+  }
+};
+
+/* Pie % label plugin — takes total as argument, returns plugin object */
+function piePlugin(total) {
+  return {
+    id: 'pieLabel',
+    afterDatasetsDraw: function(chart) {
+      var ctx = chart.ctx;
+      chart.data.datasets[0].data.forEach(function(val, i) {
+        var m   = chart.getDatasetMeta(0);
+        var arc = m.data[i];
+        var mid = (arc.startAngle + arc.endAngle) / 2;
+        var r   = arc.outerRadius * 0.67;
+        var x   = arc.x + Math.cos(mid) * r;
+        var y   = arc.y + Math.sin(mid) * r;
+        var pct = (val / total * 100).toFixed(1);
+        if (parseFloat(pct) < 3) return;
+        ctx.save();
+        ctx.font = '600 11px "IBM Plex Sans",sans-serif';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(pct + '%', x, y);
+        ctx.restore();
+      });
+    }
+  };
+}
+
+/* Line value label plugin */
+var lineLabelPlugin = {
+  id: 'lineLabel',
+  afterDatasetsDraw: function(chart) {
+    var ctx = chart.ctx;
+    chart.data.datasets[0].data.forEach(function(val, i) {
+      var m  = chart.getDatasetMeta(0);
+      var pt = m.data[i];
+      ctx.save();
+      ctx.font = '600 10px "IBM Plex Mono",monospace';
+      ctx.fillStyle = '#8a3ffc';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(fmt(val), pt.x, pt.y - 10);
+      ctx.restore();
+    });
+  }
+};
+
+/* ─── WORD CLOUD builder ─────────────────────────────────── */
+function buildWordCloud(id, data, palette) {
+  var el  = document.getElementById(id);
+  var max = data[0].v;
+  data.forEach(function(d, i) {
+    var span = document.createElement('span');
+    span.className = 'wc-word';
+    var sz = Math.round(12 + (d.v / max) * 26);
+    span.textContent  = d.w;
+    span.style.fontSize = sz + 'px';
+    span.style.color    = palette[i % palette.length];
+    span.title = d.w + ': ' + fmtf(d.v) + ' respondents';
+    el.appendChild(span);
+  });
+}
+
+/* ─── BUBBLE builder ─────────────────────────────────────── */
+function buildBubbles(id, data, palette) {
+  var el  = document.getElementById(id);
+  var max = data[0].v;
+  data.forEach(function(d, i) {
+    var ratio = d.v / max;
+    var sz    = Math.round(44 + ratio * 58);
+    var col   = palette[i % palette.length];
+    var item  = document.createElement('div');
+    item.className = 'bub';
+    var circ = document.createElement('div');
+    circ.className = 'bub-circle';
+    circ.style.width      = sz + 'px';
+    circ.style.height     = sz + 'px';
+    circ.style.background = col;
+    var fnm = Math.max(8, Math.round(sz / 8));
+    var fvl = Math.max(7, Math.round(sz / 11));
+    circ.innerHTML = '<span style="font-size:' + fnm + 'px;color:#fff;font-weight:700;padding:0 3px;display:block;text-align:center;line-height:1.2">' + d.n + '</span>' +
+                     '<span style="font-size:' + fvl + 'px;color:rgba(255,255,255,.85);font-family:\'IBM Plex Mono\',monospace;display:block;text-align:center;margin-top:2px">' + fmt(d.v) + '</span>';
+    item.appendChild(circ);
+    el.appendChild(item);
+  });
+}
+
+/* ─── TREEMAP builder ────────────────────────────────────── */
+function buildTreemap(id, data, palette) {
+  var el    = document.getElementById(id);
+  var total = 0;
+  data.forEach(function(d) { total += d.v; });
+  var rows = [data.slice(0, 4), data.slice(4, 10)];
+  rows.forEach(function(row, ri) {
+    var rowEl    = document.createElement('div');
+    rowEl.className = 'tm-row';
+    var rowTotal = 0;
+    row.forEach(function(d) { rowTotal += d.v; });
+    row.forEach(function(d) {
+      var globalIdx = ri === 0 ? data.indexOf(d) : data.indexOf(d);
+      var cell  = document.createElement('div');
+      cell.className = 'tm-cell';
+      var flex  = (d.v / rowTotal * 100).toFixed(2);
+      var pct   = (d.v / total * 100).toFixed(1);
+      var minH  = ri === 0 ? 108 : 85;
+      cell.style.flex       = flex;
+      cell.style.background = palette[globalIdx % palette.length];
+      cell.style.minHeight  = minH + 'px';
+      cell.innerHTML = '<div class="tm-lbl">' + d.n + '</div>' +
+                       '<div class="tm-val">' + fmtf(d.v) + ' (' + pct + '%)</div>';
+      rowEl.appendChild(cell);
+    });
+    el.appendChild(rowEl);
+  });
+}
+
+/* ─── MAP BARS builder ───────────────────────────────────── */
+function buildMap(id, data, palette) {
+  var el  = document.getElementById(id);
+  var max = data[0].v;
+  data.forEach(function(d, i) {
+    var pct = (d.v / max * 100).toFixed(1);
+    var row = document.createElement('div');
+    row.className = 'map-row';
+    var flag  = document.createElement('div');
+    flag.className = 'map-flag';
+    flag.textContent = d.f;
+    var name  = document.createElement('div');
+    name.className = 'map-name';
+    name.textContent = d.c;
+    var track = document.createElement('div');
+    track.className = 'map-track';
+    var fill  = document.createElement('div');
+    fill.className = 'map-fill';
+    fill.style.width      = pct + '%';
+    fill.style.background = palette[i % palette.length];
+    var val   = document.createElement('span');
+    val.className = 'map-val';
+    val.textContent = fmtf(d.v);
+    fill.appendChild(val);
+    track.appendChild(fill);
+    row.appendChild(flag);
+    row.appendChild(name);
+    row.appendChild(track);
+    el.appendChild(row);
+  });
+}
+
+/* ═══════ RENDER TAB 1 ═══════════════════════════════════════════════ */
+
+/* 1-1: Language Have — Horizontal Bar */
+new Chart(document.getElementById('c1p1'), {
+  type: 'bar',
+  data: {
+    labels: langHaveL,
+    datasets: [{ data: langHaveV, backgroundColor: BLUE, borderWidth: 0, borderRadius: 2 }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: '#e0e0e0', lineWidth: 0.7 }, border: { display: false }, ticks: { callback: function(v) { return fmt(v); } } },
+      y: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 11, weight: '500' }, color: '#393939' } }
+    },
+    layout: { padding: { right: 58 } }
+  },
+  plugins: [hLabelPlugin]
+});
+
+/* 1-2: Database Have — Column */
+new Chart(document.getElementById('c1p2'), {
+  type: 'bar',
+  data: {
+    labels: dbHaveL,
+    datasets: [{ data: dbHaveV, backgroundColor: TEAL, borderWidth: 0, borderRadius: 2 }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 10 }, maxRotation: 40, color: '#393939' } },
+      y: { grid: { color: '#e0e0e0', lineWidth: 0.7 }, border: { display: false }, ticks: { callback: function(v) { return fmt(v); } } }
+    },
+    layout: { padding: { top: 18 } }
+  },
+  plugins: [vLabelPlugin]
+});
+
+/* 1-3: Platform Have — Word Cloud */
+buildWordCloud('wc1', platHave, PURPLE);
+
+/* 1-4: WebFrame Have — Hierarchy Bubble */
+buildBubbles('bub1', webHave, MULTI);
+
+/* ═══════ RENDER TAB 2 ═══════════════════════════════════════════════ */
+
+/* 2-1: Language Want — Horizontal Bar */
+new Chart(document.getElementById('c2p1'), {
+  type: 'bar',
+  data: {
+    labels: langWantL,
+    datasets: [{ data: langWantV, backgroundColor: BLUE, borderWidth: 0, borderRadius: 2 }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: '#e0e0e0', lineWidth: 0.7 }, border: { display: false }, ticks: { callback: function(v) { return fmt(v); } } },
+      y: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 11, weight: '500' }, color: '#393939' } }
+    },
+    layout: { padding: { right: 58 } }
+  },
+  plugins: [hLabelPlugin]
+});
+
+/* 2-2: Database Want — Column */
+new Chart(document.getElementById('c2p2'), {
+  type: 'bar',
+  data: {
+    labels: dbWantL,
+    datasets: [{ data: dbWantV, backgroundColor: TEAL, borderWidth: 0, borderRadius: 2 }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 10 }, maxRotation: 40, color: '#393939' } },
+      y: { grid: { color: '#e0e0e0', lineWidth: 0.7 }, border: { display: false }, ticks: { callback: function(v) { return fmt(v); } } }
+    },
+    layout: { padding: { top: 18 } }
+  },
+  plugins: [vLabelPlugin]
+});
+
+/* 2-3: Platform Want — Tree Map */
+buildTreemap('tm1', platWant, HEAT);
+
+/* 2-4: WebFrame Want — Hierarchy Bubble */
+buildBubbles('bub2', webWant, MULTI);
+
+/* ═══════ RENDER TAB 3 ═══════════════════════════════════════════════ */
+
+/* 3-1: Age — Pie */
+var ageTot = ageV.reduce(function(a, b) { return a + b; }, 0);
+new Chart(document.getElementById('c3p1'), {
+  type: 'pie',
+  data: {
+    labels: ageL,
+    datasets: [{ data: ageV, backgroundColor: BLUE, borderColor: '#fff', borderWidth: 2.5, hoverOffset: 7 }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'right', labels: { boxWidth: 10, padding: 9, font: { size: 11 } } },
+      tooltip: { callbacks: { label: function(c) { return ' ' + c.label + ': ' + fmtf(c.parsed) + ' (' + (c.parsed / ageTot * 100).toFixed(1) + '%)'; } } }
+    }
+  },
+  plugins: [piePlugin(ageTot)]
+});
+
+/* 3-2: Employment — Pie */
+var empTot = empV.reduce(function(a, b) { return a + b; }, 0);
+new Chart(document.getElementById('c3p2'), {
+  type: 'pie',
+  data: {
+    labels: empL,
+    datasets: [{ data: empV, backgroundColor: TEAL, borderColor: '#fff', borderWidth: 2.5, hoverOffset: 7 }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'right', labels: { boxWidth: 10, padding: 7, font: { size: 10 } } },
+      tooltip: { callbacks: { label: function(c) { return ' ' + c.label + ': ' + fmtf(c.parsed) + ' (' + (c.parsed / empTot * 100).toFixed(1) + '%)'; } } }
+    }
+  },
+  plugins: [piePlugin(empTot)]
+});
+
+/* 3-3: Country — Map bars */
+buildMap('map1', countries, BLUE);
+
+/* 3-4: Education Level — Pie */
+var edTot = edV.reduce(function(a, b) { return a + b; }, 0);
+new Chart(document.getElementById('c3p4'), {
+  type: 'pie',
+  data: {
+    labels: edL,
+    datasets: [{ data: edV, backgroundColor: PIE_P, borderColor: '#fff', borderWidth: 2.5, hoverOffset: 7 }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'right', labels: { boxWidth: 10, padding: 7, font: { size: 9 } } },
+      tooltip: { callbacks: { label: function(c) { return ' ' + c.label + ': ' + fmtf(c.parsed) + ' (' + (c.parsed / edTot * 100).toFixed(1) + '%)'; } } }
+    }
+  },
+  plugins: [piePlugin(edTot)]
+});
+
+/* 3-5: Coding Activities — Pie */
+var codTot = codV.reduce(function(a, b) { return a + b; }, 0);
+new Chart(document.getElementById('c3p5'), {
+  type: 'pie',
+  data: {
+    labels: codL,
+    datasets: [{ data: codV, backgroundColor: MULTI, borderColor: '#fff', borderWidth: 2.5, hoverOffset: 7 }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'right', labels: { boxWidth: 10, padding: 8, font: { size: 10 } } },
+      tooltip: { callbacks: { label: function(c) { return ' ' + c.label + ': ' + fmtf(c.parsed) + ' (' + (c.parsed / codTot * 100).toFixed(1) + '%)'; } } }
+    }
+  },
+  plugins: [piePlugin(codTot)]
+});
+
+/* ═══════ TAB SWITCHER ════════════════════════════════════════════════ */
+function switchTab(id, el) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

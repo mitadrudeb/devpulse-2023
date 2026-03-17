@@ -1,0 +1,42 @@
+# ── Python ───────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+*.egg-info/
+dist/
+build/
+
+# ── Jupyter ───────────────────────────────────
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# ── Large data files (too big for GitHub) ────
+# Download from: https://insights.stackoverflow.com/survey
+data/raw/survey_data_updated.csv
+data/raw/survey-data.sqlite
+data/raw/survey-results-public.sqlite
+
+# Keep processed/cleaned files (smaller)
+# data/processed/ — these are tracked
+
+# ── OS files ──────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+
+# ── IDE ───────────────────────────────────────
+.vscode/
+.idea/
+*.code-workspace
+data/raw/
+data/processed/survey_data_analyzed.csv
+data/processed/survey_data_no_outliers.csv
+data/processed/survey_data_correlation_analysis.csv
+data/processed/survey_data_distribution_analysis.csv
