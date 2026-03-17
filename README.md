@@ -1,238 +1,128 @@
-# 🚀 DevPulse 2023 — Decoding the Global Developer Ecosystem
+# DevPulse 2023 — Stack Overflow Developer Survey Analysis
 
-[![IBM Data Science](https://img.shields.io/badge/IBM-Data%20Science%20Certificate-054ADA?style=flat&logo=ibm)](https://www.coursera.org/professional-certificates/ibm-data-science)
-[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat&logo=python&logoColor=white)](https://python.org)
-[![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-F37626?style=flat&logo=jupyter&logoColor=white)](https://jupyter.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-
-> **Capstone project for the IBM Data Analytics Professional Certificate.**  
-> A full end-to-end data analysis of the Stack Overflow Developer Survey 2023 — covering data wrangling, exploratory analysis, statistical analysis, visualization, dashboard design, and findings reporting.
+This is my capstone project for the IBM Data Analytics Professional Certificate. The goal was to analyze the Stack Overflow Developer Survey 2023 dataset and find meaningful insights about what technologies developers are using today and what they plan to use in the future.
 
 ---
 
-## 📌 Project Overview
+## What this project is about
 
-**DevPulse 2023** analyzes responses from **65,437 developers across 180+ countries** to answer three core questions:
+The Stack Overflow Developer Survey is one of the largest surveys of software developers in the world. The 2023 edition had responses from 65,437 developers across 180+ countries.
 
-1. 🔧 **What technologies are developers using right now?**
-2. 📈 **What technologies are they planning to adopt next year?**
-3. 👥 **Who are the developers — demographically?**
+I wanted to answer three questions from this data:
 
-The findings reveal actionable insights for developers, recruiters, educators, and tech leaders about the current state and near-future trajectory of the global software ecosystem.
+1. What programming languages, databases, and tools are developers actively using right now?
+2. What technologies are they planning to learn or switch to next year?
+3. Who are these developers — how old are they, where are they from, what's their education background?
 
 ---
 
-## 🗂️ Repository Structure
+## What I found
+
+A few things surprised me during the analysis:
+
+- JavaScript has been the most used language for years and it's still #1 — both in current use (37,492 respondents) and future demand (21,869). I expected Python to be closer.
+- PostgreSQL is overtaking MySQL in future demand. MySQL is still the most used database today (26,245) but PostgreSQL is what more developers *want* to use next year (24,005). I thought MySQL would hold its position longer.
+- Kubernetes jumped from #7 in current platform usage to #3 in desired platforms. Cloud-native development is clearly accelerating faster than I expected.
+- 37% of all respondents are in the 25–34 age group, and 68% have at least a bachelor's degree. The developer community is younger and more formally educated than I assumed going in.
+
+---
+
+## Project structure
 
 ```
 devpulse-2023/
-│
-├── 📓 notebooks/                    # Jupyter analysis notebooks (M1–M15)
-│   ├── 01_data_exploration.ipynb    # Initial data loading and survey structure
-│   ├── 02_data_wrangling.ipynb      # Cleaning, nulls, duplicates, normalization
-│   ├── 03_exploratory_analysis.ipynb# Frequency distributions, top-10 rankings
-│   ├── 04_distribution_analysis.ipynb # Statistical distributions
-│   ├── 05_outliers_duplicates.ipynb # Outlier detection and removal
-│   ├── 06_correlation_analysis.ipynb# Correlation heatmaps and analysis
-│   ├── 07_visualization_basics.ipynb# Core chart building
-│   ├── 08_histogram_charts.ipynb    # Distribution histograms
-│   ├── 09_boxplot_analysis.ipynb    # Box plots for age/salary distributions
-│   ├── 10_scatter_trendline.ipynb   # Scatter plots with trend lines
-│   ├── 11_pie_charts.ipynb          # Demographic pie charts
-│   ├── 12_stacked_charts.ipynb      # Age × Education stacked analysis
-│   ├── 13_line_charts.ipynb         # Education level line chart
-│   └── 14_bar_charts.ipynb          # Age group bar chart analysis
-│
-├── 📊 dashboard/
-│   └── StackOverflow_Dashboard.html # Interactive Chart.js dashboard (3 tabs, 12 charts)
-│
-├── 📁 data/
-│   ├── raw/                         # Original source data (see note below)
-│   └── processed/                   # Cleaned and transformed datasets
-│       ├── survey_data_cleaned.csv
-│       ├── survey_data_analyzed.csv
-│       ├── survey_data_distribution_analysis.csv
-│       ├── survey_data_correlation_analysis.csv
-│       └── survey_data_no_outliers.csv
-│
-├── 📄 report/
-│   └── Data_Analyst_Capstone_Project_Report.pdf  # Final 14-slide presentation
-│
-├── requirements.txt                 # Python dependencies
-├── .gitignore
+├── notebooks/          — 14 Jupyter notebooks covering the full analysis pipeline
+├── dashboard/          — Interactive dashboard built with Chart.js (open in browser)
+├── data/
+│   ├── processed/      — Cleaned datasets used in analysis
+│   └── raw/            — Original source files (too large for GitHub, see data/README.md)
+├── report/             — Final presentation PDF (submitted for grading)
+├── requirements.txt
 └── README.md
 ```
 
-> **Note on raw data:** The original `survey_data_updated.csv` (65,437 rows) exceeds GitHub's recommended file size. Download it directly from [Stack Overflow's public survey data](https://insights.stackoverflow.com/survey) or the IBM Skills Network.
+---
+
+## The notebooks
+
+I split the work across 14 notebooks, roughly following the course module structure:
+
+| Notebook | What it covers |
+|----------|----------------|
+| 01_data_exploration | First look at the dataset — shape, columns, data types |
+| 02_data_wrangling | Handling missing values, splitting pipe-delimited columns, removing duplicates |
+| 03_exploratory_analysis | Frequency counts, top-10 rankings for all tech categories |
+| 04_distribution_analysis | Statistical distributions across key columns |
+| 05_outliers_duplicates | IQR-based outlier detection and removal |
+| 06_correlation_analysis | Correlation matrix and heatmaps |
+| 07_visualization_basics | Building the core chart types |
+| 08_histogram_charts | Distribution histograms |
+| 09_boxplot_analysis | Box plots for age and experience |
+| 10_scatter_trendline | Scatter plots with regression lines |
+| 11_pie_charts | Demographic breakdowns (age, employment, education) |
+| 12_stacked_charts | Age vs education stacked bar analysis |
+| 13_line_charts | Education level line chart |
+| 14_bar_charts | Age group bar charts with filters |
 
 ---
 
-## 📊 Dashboard Preview
+## The dashboard
 
-The interactive dashboard is built with **Chart.js** and runs entirely in the browser — no server needed.
+The dashboard is a single HTML file that runs entirely in the browser — no setup needed. It has three tabs:
 
-**Open `dashboard/StackOverflow_Dashboard.html` in any modern browser.**
+- **Current Technology Usage** — languages, databases, platforms, and frameworks developers use today
+- **Future Technology Trends** — what they want to work with next year
+- **Demographics** — age, employment, country, education, and coding activities
 
-### Tab 1 — Current Technology Usage
-| Chart | Type | Key Finding |
-|-------|------|-------------|
-| Top 10 Languages | Horizontal Bar | JavaScript leads (37,492 users) |
-| Top 10 Databases | Column Chart | MySQL most used (26,245) |
-| Top 10 Platforms | Word Cloud | Linux dominant (30,522) |
-| Top 10 Web Frameworks | Hierarchy Bubble | React #1 (25,029) |
-
-### Tab 2 — Future Technology Trends
-| Chart | Type | Key Finding |
-|-------|------|-------------|
-| Languages Desired | Horizontal Bar | JavaScript still #1 (21,869) |
-| Databases Desired | Column Chart | PostgreSQL surges to #1 (24,005) |
-| Platforms Desired | Tree Map | Kubernetes jumps from #7 → #3 |
-| Frameworks Desired | Hierarchy Bubble | Next.js fastest-growing |
-
-### Tab 3 — Demographics
-| Chart | Type | Key Finding |
-|-------|------|-------------|
-| Age Distribution | Pie Chart | 25–34 dominant (37%) |
-| Employment Status | Pie Chart | 67% employed full-time |
-| Country Distribution | Map Chart | US + India = 29% |
-| Education Level | Pie Chart | 68% bachelor's degree+ |
-| Coding Activities | Pie Chart | Hobby coding leads (33,241) |
+To open it, just download the file and open it in Chrome or Firefox:
+```
+dashboard/StackOverflow_Dashboard.html
+```
 
 ---
 
-## 🔍 Key Findings
+## How to run the notebooks
 
-### 💻 Languages
-- **JavaScript** tops both current (37,492) and desired (21,869) usage — unmatched end-to-end dominance
-- **Python** surges to #2 desired, driven by AI/ML demand
-- **Rust** enters the desired top-6 despite low current adoption — a major emerging signal
-- **TypeScript** holds #5 in both charts — type safety is now a baseline expectation
-
-### 🗄️ Databases
-- **PostgreSQL** overtakes MySQL in future demand (24,005 vs 12,269) — the most significant technology shift in the survey
-- **SQLite** is underrated at #3 in both charts — embedded/edge computing demand is real
-- **Neo4j** and **Cassandra** enter the desired top-10 — graph and distributed DBs are gaining momentum
-
-### ☁️ Platforms & Frameworks
-- **Linux + Docker + Kubernetes** = the default production stack
-- **Kubernetes** jumps from #7 current → #3 desired — cloud-native is accelerating
-- **React + Node.js** hold dual #1/#2 in both current and desired frameworks
-
-### 👥 Demographics
-- **25–34** age cohort: 37% of all developers (industry's primary career-builders)
-- **67%** employed full-time; independent contracting at 5.4%
-- **68%** hold at least a bachelor's degree
-- **US + India** represent ~29% of respondents — Asia's trajectory is upward
-
----
-
-## 🛠️ Tech Stack
-
-| Tool | Purpose |
-|------|---------|
-| **Python 3.11** | Core analysis language |
-| **pandas** | Data wrangling and manipulation |
-| **numpy** | Numerical operations |
-| **matplotlib** | Static visualizations |
-| **seaborn** | Statistical plotting |
-| **sqlite3** | Database querying |
-| **Jupyter Notebook** | Interactive analysis environment |
-| **Chart.js v4.4** | Interactive dashboard (browser-native) |
-| **HTML / CSS / JS** | Dashboard frontend (zero dependencies) |
-
----
-
-## ⚡ Quick Start
-
-### 1. Clone the repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/devpulse-2023.git
+git clone https://github.com/mitadrudeb/devpulse-2023.git
 cd devpulse-2023
-```
-
-### 2. Install dependencies
-```bash
 pip install -r requirements.txt
-```
-
-### 3. Launch Jupyter
-```bash
 jupyter notebook notebooks/
 ```
 
-### 4. Open the dashboard
-```bash
-# Simply open in your browser:
-open dashboard/StackOverflow_Dashboard.html
-# or on Windows:
-start dashboard/StackOverflow_Dashboard.html
-```
+Note: The raw dataset is not included in this repo because it's too large for GitHub (~150MB). You can download it from the [Stack Overflow survey page](https://insights.stackoverflow.com/survey) or through the IBM Skills Network.
 
 ---
 
-## 📁 Notebook Guide
+## Tools used
 
-| Notebook | Module | Description |
-|----------|--------|-------------|
-| `01_data_exploration.ipynb` | M1 | Load dataset, inspect shape, columns, dtypes |
-| `02_data_wrangling.ipynb` | M2 | Handle missing values, normalize multi-select columns |
-| `03_exploratory_analysis.ipynb` | M3 | Frequency distributions, top-10 rankings |
-| `04_distribution_analysis.ipynb` | M4 | Statistical distributions and normality checks |
-| `05_outliers_duplicates.ipynb` | M5 | Outlier detection (IQR), duplicate removal |
-| `06_correlation_analysis.ipynb` | M6 | Correlation matrix, heatmaps |
-| `07_visualization_basics.ipynb` | M7 | Core visualization patterns |
-| `08_histogram_charts.ipynb` | M8 | Distribution histograms with outlier handling |
-| `09_boxplot_analysis.ipynb` | M9 | Box plots for age and compensation analysis |
-| `10_scatter_trendline.ipynb` | M10 | Scatter plots with regression trend lines |
-| `11_pie_charts.ipynb` | M12 | Demographic pie charts (age, employment, education) |
-| `12_stacked_charts.ipynb` | M13 | Age × Education stacked bar analysis |
-| `13_line_charts.ipynb` | M14 | Education level line chart with markers |
-| `14_bar_charts.ipynb` | M15 | Age group bar chart with filters |
+- Python 3.11
+- pandas, numpy
+- matplotlib, seaborn
+- Jupyter Notebook
+- Chart.js (for the dashboard)
+- SQLite (for some of the SQL-based exercises)
+- AI coding assistants (Claude, ChatGPT) — used occasionally for debugging errors and understanding concepts I was stuck on
 
 ---
 
-## 📈 Results Summary
+## Results
 
-```
-Dataset:     Stack Overflow Developer Survey 2023
-Rows:        65,437 respondents
-Columns:     114 attributes
-Countries:   180+ represented
-Notebooks:   14 analysis modules
-Charts:      12 dashboard visualizations
-Tabs:        3 (Current Tech · Future Trends · Demographics)
-Report:      14-slide PDF presentation
-Final Grade: 100% ✅
-```
+The final presentation PDF is in the `report/` folder. It was graded as part of the IBM Data Analytics Professional Certificate capstone and scored 14/14.
 
 ---
 
-## 🏆 Certification
+## Data source
 
-This project was completed as the **capstone for the IBM Data Analytics Professional Certificate** on Coursera.
+Stack Overflow (2023). Annual Developer Survey.
+Available at: https://insights.stackoverflow.com/survey
 
-- ✅ Final grade: **100% (14/14 points)**
-- ✅ Certificate: IBM Data Analytics Professional Certificate
-- ✅ Skills validated: Data wrangling · EDA · Statistical analysis · Data visualization · Dashboard design · Findings reporting
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
-
-The Stack Overflow Developer Survey data is provided under the [Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/).
+The data is provided under the [Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/).
 
 ---
 
-## 🙋 About
+## About
 
-**[Your Name]**  
-Data Analyst | IBM Certified  
-📧 [your.email@example.com]  
-💼 [linkedin.com/in/yourprofile]  
-🐙 [github.com/your-username]
+I'm Mitadru Deb— currently building my skills in data analytics. This is one of the first end-to-end projects I've completed independently, from raw data all the way to a final report and interactive dashboard.
 
----
-
-*Built with Python, Jupyter, Chart.js, and a lot of curiosity about the developer ecosystem.*
+Feel free to connect on [LinkedIn](https://linkedin.com/in/mitadrudeb) if you have questions or feedback about the project.
