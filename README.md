@@ -96,13 +96,13 @@ Note: The raw dataset is not included in this repo because it's too large for Gi
 
 ## Tools used
 
-- Python 3.11
-- pandas, numpy
-- matplotlib, seaborn
-- Jupyter Notebook
-- Chart.js (for the dashboard)
-- SQLite (for some of the SQL-based exercises)
-- AI coding assistants (Claude, ChatGPT) — used occasionally for debugging errors and understanding concepts I was stuck on
+* Python 3.11
+* pandas, numpy
+* matplotlib, seaborn
+* Jupyter Notebook
+* Chart.js (for the dashboard)
+* SQLite (for some of the SQL-based exercises)
+* Git/GitHub, Stack Overflow, official documentation, and AI assistants (Claude, ChatGPT) for debugging support and concept clarification
 
 ---
 
